@@ -1255,6 +1255,7 @@ void doNotOptimizeAway(T const& val) {
 #    include <sstream>   // to_s in Number
 #    include <stdexcept> // throw for rendering templates
 #    include <tuple>     // std::tie
+#    include <mutex>     // std::mutex, std::lock_guard
 #    if defined(__linux__)
 #        include <unistd.h> //sysconf
 #    endif
@@ -1889,7 +1890,7 @@ PerformanceCounters& performanceCounters() {
 #        pragma clang diagnostic push
 #        pragma clang diagnostic ignored "-Wexit-time-destructors"
 #    endif
-    static PerformanceCounters pc;
+    static thread_local PerformanceCounters pc;
 #    if defined(__clang__)
 #        pragma clang diagnostic pop
 #    endif
@@ -2244,6 +2245,11 @@ struct IterationLogic::Impl {
             hash = hash_combine(std::hash<double>{}(mBench.timeUnit().count()), hash);
             hash = hash_combine(std::hash<bool>{}(mBench.relative()), hash);
             hash = hash_combine(std::hash<bool>{}(mBench.performanceCounters()), hash);
+
+            // mutex is needed to serialize access to os in case multiple
+            // Bench objects are being used concurrently.
+            static std::mutex mtx;
+            const std::lock_guard lock(mtx);
 
             if (hash != singletonHeaderHash()) {
                 singletonHeaderHash() = hash;
