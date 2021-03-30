@@ -1994,6 +1994,8 @@ void gatherStabilityInformation(std::vector<std::string>& warnings, std::vector<
 }
 
 void printStabilityInformationOnce(std::ostream* outStream) {
+    static std::mutex mtx;
+    const std::lock_guard lock(mtx);
     static bool shouldPrint = true;
     if (shouldPrint && outStream && isWarningsEnabled()) {
         auto& os = *outStream;
