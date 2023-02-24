@@ -6,7 +6,7 @@ ROOTDIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd )"
 
 function build() {
     #NICE="nice -n20"
-    NICE="schedtool -5 -e"
+    NICE="chrt -i 0"
 
     ORIGINDIR=$(pwd)
 
@@ -25,7 +25,7 @@ function build() {
     ${NICE} cmake --build .
     rm -f ubsan.log*
 
-    UBSAN_OPTIONS=print_stacktrace=1:log_path=ubsan.log:suppressions=${ROOTDIR}/ubsan.supp ${NICE} ./nb
+    UBSAN_OPTIONS=print_stacktrace=1:log_path=ubsan.log:suppressions=${ROOTDIR}/ubsan.supp ./nb
     if ls ubsan.log* 1> /dev/null 2>&1; then
         cat ubsan.log*
         exit 1
@@ -42,6 +42,7 @@ function build() {
 ## DON'T MODIFY PAST HERE! Just copy&past above this line to test it before other stuff.
 
 build "clang++" "11" "OFF"
+build "g++" "20" "OFF"
 build "clang++" "11" "OFF" "-m32"
 build "clang++" "11" "ON"
 #build "clang++" "11" "ON" "-m32" # linker error in chrono

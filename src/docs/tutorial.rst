@@ -71,7 +71,7 @@ Usage
    5.63ns on my machine (wall-clock time), or ~178 million operations per second. Runtime
    fluctuates by around 0.0%, so the results are very stable. Each call
    required 3 instructions, which took ~18 CPU cycles. There was a single branch per call,
-   with only 0.1% misspredicted. 
+   with only 0.1% mispredicted. 
 
 Nanobench does not come with a test runner, so you can easily use it with any framework you like.  In the remaining examples, I'm
 using `doctest <https://github.com/onqtam/doctest>`_ as a unit test framework.
@@ -106,14 +106,14 @@ After 0.2ms we get this output:
    |--------------------:|--------------------:|--------:|----------:|:----------
    |                   - |                   - |       - |         - | :boom: `++x` (iterations overflow. Maybe your code got optimized away?)
 
-No data there! we only get ``:boom: iterations overflow.``.  The compiler could optimize ``x += x``
+No data there! We only get ``:boom: iterations overflow.``.  The compiler could optimize ``x += x``
 away because we never used the output. Thanks to ``doNotOptimizeAway``, this is easy to fix:
 
 .. literalinclude:: ../test/tutorial_fast_v2.cpp
    :language: c++
    :linenos:
    :caption: tutorial_fast_v2.cpp
-   :emphasize-lines: 7
+   :emphasize-lines: 8
 
 This time the benchmark runs for 2.2ms and we actually get reasonable data:
 
@@ -146,7 +146,7 @@ After 1.1 seconds I get
    |      100,125,753.00 |                9.99 |    0.0% |           51.00 |        7,714.00 |  0.007 |          11.00 |   90.9% |      1.10 | `sleep 100ms, auto`
 
 
-So we actually take 100.125ms instead of 100ms. Next time I run it, I get 100.141. Also a very stable result. Interestingly, sleep takes 51 instructions but 7,714 cycles - so we only got 0.007 instructions per cycle. That's extremely low, but expected of ``sleep``. It also required 11 branches, of which 90.9% were misspredicted on average.
+So we actually take 100.125ms instead of 100ms. Next time I run it, I get 100.141. Also a very stable result. Interestingly, sleep takes 51 instructions but 7,714 cycles - so we only got 0.007 instructions per cycle. That's extremely low, but expected of ``sleep``. It also required 11 branches, of which 90.9% were mispredicted on average.
 
 If the extremely slow 1.1 second is too much for you, you can manually configure the number of evaluations (epochs):
 
@@ -161,13 +161,13 @@ If the extremely slow 1.1 second is too much for you, you can manually configure
    |--------------------:|--------------------:|--------:|----------------:|----------------:|-------:|---------------:|--------:|----------:|:----------
    |      100,099,096.00 |                9.99 |    0.0% |           51.00 |        7,182.00 |  0.007 |          11.00 |   90.9% |      0.30 | `sleep 100ms`
 
-This time it took only 0.3 seconds, but with only 3 evaluations instead of 11. The err% will be less meaningfull, but since the benchmark is so stable it doesn't really matter.
+This time it took only 0.3 seconds, but with only 3 evaluations instead of 11. The err% will be less meaningful, but since the benchmark is so stable it doesn't really matter.
 
 
 Something Unstable
 ------------------
 
-Lets create an extreme artifical test that's hard to benchmark, because runtime fluctuates randomly: Each iteration
+Let's create an extreme artificial test that's hard to benchmark, because runtime fluctuates randomly: Each iteration
 randomly skip between 0-254 random numbers:
 
 .. literalinclude:: ../test/tutorial_fluctuating_v1.cpp
@@ -191,7 +191,7 @@ Let's use the suggestion and set the minimum number of iterations to 5000, and t
    :language: c++
    :linenos:
    :caption: tutorial_fluctuating_v2.cpp
-   :emphasize-lines: 9
+   :emphasize-lines: 10
 
 
 The fluctuations are much better:
@@ -210,8 +210,10 @@ The results are  more stable, with only 0.7% error.
 
 Comparing Results
 =================
+To compare results, keep the `ankerl::nanobench::Bench` object around, enable `.relative(true)`, and `.run(...)` your benchmarks. All benchmarks will be automatically compared to the first one.
 
-I have implemented a comparison of multiple random number generators.
+
+As an example, I have implemented a comparison of multiple random number generators.
 Here several RNGs are compared to a baseline calculated from `std::default_random_engine`.
 I factored out the general benchmarking code so it's easy to use for each of the random number generators:
 
@@ -320,7 +322,7 @@ The following example shows how to use the `CSV - Comma-Separated Values`_ templ
 .. literalinclude:: ../test/tutorial_render_simple.cpp
    :language: c++
    :linenos:
-   :emphasize-lines: 11,16
+   :emphasize-lines: 12,17
    :caption: tutorial_render_simple.cpp
 
 
@@ -333,13 +335,18 @@ CSV template, and write the rendered output to ``std::cout``. When running, we g
    :language: text
 
 Nanobench comes with a few preconfigured templates, residing in the namespace ``ankerl::nanobench::templates``. To demonstrate what these templates can do,
-here is an simple example that benchmarks two random generators ``std::mt19937_64`` and ``std::knuth_b`` and prints both the template and the rendered
+here is a simple example that benchmarks two random generators ``std::mt19937_64`` and ``std::knuth_b`` and prints both the template and the rendered
 output:
 
 .. literalinclude:: ../test/tutorial_mustache.cpp
    :language: c++
    :linenos:
 
+Nanobench allows to specify further context information, which may be accessed using ``{{context(name)}}`` where ``name`` names a variable defined via :cpp:func:`Bench::context() <ankerl::nanobench::Bench::context()>`.
+
+.. literalinclude:: ../test/tutorial_context.cpp
+   :language: c++
+   :linenos:
 
 .. _tutorial-template-csv:
 
@@ -375,7 +382,7 @@ HTML Box Plots
 --------------
 
 With the template :cpp:func:`ankerl::nanobench::templates::htmlBoxplot()` you get a `plotly <https://plotly.com/javascript/>`_ based HTML output which generates
-an boxplot of the runtime. The template is rather simple.
+a boxplot of the runtime. The template is rather simple.
 
 .. literalinclude:: _generated/mustache.template.html
    :language: xml
@@ -424,7 +431,7 @@ The template looks like this. Note that it directly makes use of ``{{#measuremen
    :language: text
    :linenos:
 
-Here is an example that generates pyperf compatible output for a benchmark that shuffles an vector:
+Here is an example that generates pyperf compatible output for a benchmark that shuffles a vector:
 
 .. literalinclude:: ../test/example_pyperf.cpp
    :language: cpp
@@ -455,7 +462,7 @@ Run ``python3 -m pyperf hist pyperf_shuffle_std.json`` produces this output
 Compare Results
 ~~~~~~~~~~~~~~~
 
-We have generated two results in the above examples, and we can compare them easily with ``python3 -m pyperf compare_to pyperf_shuffle_std.json pyperf_shuffle_nanobench.json``:
+We have generated two results in the above examples, and we can compare them easily with ``python3 -m pyperf compare_to a.json b.json``:
 
 .. literalinclude:: code/pyperf_compare_to.txt
    :language: text

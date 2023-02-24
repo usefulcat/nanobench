@@ -3,13 +3,15 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 namespace {
 
 std::string readFile(std::string const& filename) {
-    std::ifstream fin{filename};
-    return std::string{std::istreambuf_iterator<char>(fin),
-                       std::istreambuf_iterator<char>()};
+    std::ifstream fin{filename}; // NOLINT(misc-const-correctness)
+    std::ostringstream buf;
+    buf << fin.rdbuf();
+    return buf.str();
 }
 
 // path where the template files are
@@ -22,6 +24,7 @@ std::string tplPath() {
 
 } // namespace
 
+// NOLINTNEXTLINE
 TEST_CASE("unit_templates_generate" * doctest::skip()) {
     {
         std::ofstream fout{tplPath() + "mustache.template.json"};
@@ -44,6 +47,7 @@ TEST_CASE("unit_templates_generate" * doctest::skip()) {
     }
 }
 
+// NOLINTNEXTLINE
 TEST_CASE("unit_templates") {
     REQUIRE(readFile(tplPath() + "mustache.template.json") ==
             std::string{ankerl::nanobench::templates::json()});
